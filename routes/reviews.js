@@ -9,6 +9,8 @@ const { reviewSchema } = require('../schema.js');
 const ExpressError = require('../utils/ExpressError');
 const catchAsync = require('../utils/catchAsync');
 
+
+// Validation middleware for reviews
 const validateReview = (req, res, next) => {
   const { error } = reviewSchema.validate(req.body);
   if (error) {
@@ -19,6 +21,8 @@ const validateReview = (req, res, next) => {
   }
 };
 
+
+// Create and post a review
 router.post(
   '/',
   validateReview,
@@ -33,6 +37,7 @@ router.post(
   }),
 );
 
+// Delete a review
 router.delete(
   '/:reviewId',
   catchAsync(async (req, res) => {

@@ -9,9 +9,10 @@ const reviewsRouter = require('./routes/reviews');
 const session = require('express-session');
 const flash = require('connect-flash');
 
-
+// Create app with express
 const app = express();
 
+// Mongoose boilerplate ======>
 mongoose.connect('mongodb://localhost:27017/yelpcamp', {
     useNewUrlParser: true,
     useCreateIndex: true,
@@ -25,14 +26,21 @@ db.once('open', () => {
   console.log('Database connected');
 });
 
-app.engine('ejs', engine);
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
+// <==========
 
-app.use(express.urlencoded({ extended: true }));
-app.use(methodOverride('_method'));
-app.use(express.static(path.join(__dirname, 'public')));
+// Express boilerplate
+app.engine('ejs', engine); // EJS mate for partials
+app.set('view engine', 'ejs'); // Use EJS engine
+app.set('views', path.join(__dirname, 'views')); // Set the view directory to cwd
 
+
+// Express middleware boilerplate
+app.use(express.urlencoded({ extended: true })); // URL encoded method for parsing requests
+app.use(methodOverride('_method')); // Override POST methods with PUT, DELETE, etc.
+app.use(express.static(path.join(__dirname, 'public'))); // Include the public static directory in our views
+
+
+// Session and Cookie configuration ======>
 const sessionConfig = {
   secret: 'sosecret',
   resave: false,
@@ -45,32 +53,49 @@ const sessionConfig = {
 };
 
 app.use(session(sessionConfig));
+
+// <=========
+
+// Flash middleware for "flashing" elements referenced in the req.flash object ====>
 app.use(flash());
 app.use((req, res, next) => {
   res.locals.success = req.flash('success');
   res.locals.error = req.flash('error');
   next();
 })
-app.use('/campgrounds', campgroundRouter);
-app.use('/campgrounds/:id/reviews', reviewsRouter);
 
+// <===========
+
+
+// Router Settup
+app.use('/campgrounds', campgroundRouter);
+app.use('/campgrounds/:id/reviews', reviewsRouter); // requires "merge-params" option set to true in the Review router file
+
+
+
+// Basic app routes
 app.get('/', (_, res) => {
     res.render('home.ejs');
 })
 
+
+// Fallback error when the route is not referenced
 app.all('*', (req, res, next) => {
   next(new ExpressError('Page not found', 404));
 })
 
+
+// Middleware fallback for error handling
 app.use((err, req, res, next) => {
   const { status = 500 } = err;
-
   if (!err.message) {
     err.message = 'Oops something went wrong...';
   }
   res.status(status).render('error', { err });
 })
 
+
+// Opens and listen to port 3000 on localhost
 app.listen(3000, () => {
     console.log("Serving on port 3000");
     }

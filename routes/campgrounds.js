@@ -6,8 +6,10 @@ const { campgroundSchema } = require('../schema');
 const ExpressError = require('../utils/ExpressError');
 const Campground = require('../models/campground');
 
+
+// Validation middleware
 const validateCampground = (req, res, next) => {
-  const { error } = campgroundSchema.validate(req.body);
+  const { error } = campgroundSchema.validate(req.body); // Uses Joi
   if (error) {
     const msg = error.details.map((el) => el.message).join(',');
     throw new ExpressError(msg, 400);
@@ -16,6 +18,7 @@ const validateCampground = (req, res, next) => {
   }
 };
 
+// Show all campgrounds
 router.get(
   '/',
   catchAsync(async (req, res, next) => {
@@ -24,6 +27,7 @@ router.get(
   }),
 );
 
+// Update a campground
 router.put(
   '/:id',
   validateCampground,
@@ -35,6 +39,7 @@ router.put(
   }),
 );
 
+// Route to the campground edit page
 router.get(
   '/:id/edit',
   catchAsync(async (req, res) => {
@@ -43,10 +48,12 @@ router.get(
   }),
 );
 
+// Route to the campground creation page
 router.get('/new', (req, res) => {
   res.render('campgrounds/new');
 });
 
+// Create campground
 router.post(
   '/',
   validateCampground,
@@ -58,10 +65,12 @@ router.post(
   }),
 );
 
+// Route to a specific campground page
 router.get(
   '/:id',
   catchAsync(async (req, res) => {
     const campground = await Campground.findById(req.params.id).populate('reviews');
+    // Populates allows mongoose to display the content of each review object (only referenced by their id in the reviews array)
     if (!campground) {
       req.flash('error', 'Cannot find that campground!');
       return res.redirect('/campgrounds');
@@ -70,6 +79,7 @@ router.get(
   }),
 );
 
+// Remove a campground
 router.delete(
   '/:id',
   catchAsync(async (req, res) => {

@@ -1,7 +1,9 @@
+// Mongodb schema validation with Joi
 const Joi = require('joi');
 
 module.exports.campgroundSchema = Joi.object({
   campground: Joi.object({
+    // Requires the db name key
     title: Joi.string().required(),
     price: Joi.number().required().min(0),
     image: Joi.string().required(),
