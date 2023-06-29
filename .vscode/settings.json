@@ -1,9 +1,9 @@
 {
-    "editor.formatOnSave": true,
-    "editor.formatOnPaste": true,
-    "editor.codeActionsOnSave": { "source.fixAll.eslint": false },
-    "editor.gotoLocation.multipleImplementations": "goto",
-    "[javascript]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": false,
+  "editor.codeActionsOnSave": { "source.fixAll.eslint": false },
+  "editor.gotoLocation.multipleImplementations": "goto",
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
 }

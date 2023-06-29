@@ -1,53 +1,13 @@
 const express = require('express');
 const router = express.Router({ mergeParams: true });
-
-const Campground = require('../models/campground');
-const Review = require('../models/review');
-
-const { reviewSchema } = require('../schema.js');
-
-const ExpressError = require('../utils/ExpressError');
 const catchAsync = require('../utils/catchAsync');
-
-
-// Validation middleware for reviews
-const validateReview = (req, res, next) => {
-  const { error } = reviewSchema.validate(req.body);
-  if (error) {
-    const msg = error.details.map((el) => el.message).join(',');
-    throw new ExpressError(msg, 400);
-  } else {
-    next();
-  }
-};
-
+const reviewController = require('../controllers/review');
+const { isLoggedIn, validateReview } = require('../middleware');
 
 // Create and post a review
-router.post(
-  '/',
-  validateReview,
-  catchAsync(async (req, res) => {
-    const campground = await Campground.findById(req.params.id);
-    const review = new Review(req.body.review);
-    campground.reviews.push(review);
-    await review.save();
-    await campground.save();
-    req.flash('success', 'Review submitted!');
-    res.redirect(`/campgrounds/${campground._id}`);
-  }),
-);
+router.post('/', isLoggedIn, validateReview, catchAsync(reviewController.submitReview));
 
 // Delete a review
-router.delete(
-  '/:reviewId',
-  catchAsync(async (req, res) => {
-    const { id, reviewId } = req.params;
-    const campground = await Campground.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
-    await campground.save();
-    await Review.findByIdAndDelete(id);
-    req.flash('success', 'Review deleted!');
-    res.redirect(`/campgrounds/${id}`);
-  }),
-);
+router.delete('/:reviewId', isLoggedIn, catchAsync(reviewController.deleteReview));
 
 module.exports = router;

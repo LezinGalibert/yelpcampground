@@ -28,6 +28,7 @@ const seedDB = async () => {
           image: 'https://source.unsplash.com/collection/483251',
           description: 'Lorem ipsum',
           price: Math.floor(Math.random() * 100) + 10,
+          author: '649adac705cb2114a1706650',
         });
         await newCG.save();
     }

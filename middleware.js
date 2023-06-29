@@ -1,3 +1,6 @@
+const Campground = require('./models/campground');
+const { reviewSchema } = require('./schema');
+
 module.exports.isLoggedIn = (req, res, next) => {
   if (!req.isAuthenticated()) {
     req.session.returnTo = req.originalUrl;
@@ -12,4 +15,35 @@ module.exports.storeReturnTo = (req, res, next) => {
     res.locals.returnTo = req.session.returnTo;
   }
   next();
+};
+
+module.exports.authorizeChanges = async (req, res, next) => {
+  const { id } = req.paramas.id;
+  const campground = await Campground.findById(id, { ...req.paramas.campground });
+
+  if (!campground.author.equals(req.currentUser)) {
+    req.flash('error', 'You do not have the permissions to do that!');
+    return res.redirect(`/campgrounds/${id}`);
+  }
+  next();
+};
+
+module.exports.validateCampground = (req, res, next) => {
+  const { error } = campgroundSchema.validate(req.body); // Uses Joi
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(',');
+    throw new ExpressError(msg, 400);
+  } else {
+    next();
+  }
+};
+
+module.exports.validateReview = (req, res, next) => {
+  const { error } = reviewSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(',');
+    throw new ExpressError(msg, 400);
+  } else {
+    next();
+  }
 };

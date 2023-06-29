@@ -1,97 +1,29 @@
 const express = require('express');
 const router = express.Router();
 const catchAsync = require('../utils/catchAsync');
-const { campgroundSchema } = require('../schema');
+const campgroundController = require('../controllers/campgrounds');
+const { isLoggedIn, authorizeChanges, validateCampground } = require('../middleware');
 
-const ExpressError = require('../utils/ExpressError');
-const Campground = require('../models/campground');
-
-const { isLoggedIn } = require('../middleware');
-
-// Validation middleware
-const validateCampground = (req, res, next) => {
-  const { error } = campgroundSchema.validate(req.body); // Uses Joi
-  if (error) {
-    const msg = error.details.map((el) => el.message).join(',');
-    throw new ExpressError(msg, 400);
-  } else {
-    next();
-  }
-};
-
-// Show all campgrounds
-router.get(
-  '/',
-  catchAsync(async (req, res, next) => {
-    const campgrounds = await Campground.find({});
-    res.render('./campgrounds/index.ejs', { campgrounds });
-  }),
-);
-
-// Update a campground
-router.put(
-  '/:id',
-  isLoggedIn,
-  validateCampground,
-  catchAsync(async (req, res) => {
-    const { id } = req.params;
-    const campground = await Campground.findByIdAndUpdate(id, { ...req.body.campground });
-    req.flash('success', 'Campground updated!');
-    res.redirect(`/campgrounds/${campground._id}`);
-  }),
-);
-
-// Route to the campground edit page
-router.get(
-  '/:id/edit',
-  isLoggedIn,
-  catchAsync(async (req, res) => {
-    const campground = await Campground.findById(req.params.id);
-    res.render('campgrounds/edit', { campground });
-  }),
-);
+router
+  .route('/')
+  // Show all campgrounds
+  .get(catchAsync(campgroundController.index))
+  // Create campground
+  .post(isLoggedIn, authorizeChanges, validateCampground, catchAsync(campgroundController.create));
 
 // Route to the campground creation page
-router.get('/new', isLoggedIn, (req, res) => {
-  res.render('campgrounds/new');
-});
+router.get('/new', isLoggedIn, campgroundController.showNew);
 
-// Create campground
-router.post(
-  '/',
-  isLoggedIn,
-  validateCampground,
-  catchAsync(async (req, res) => {
-    const campground = new Campground(req.body.campground);
-    await campground.save();
-    req.flash('success', 'Campground created!');
-    res.redirect(`campgrounds/${campground._id}`);
-  }),
-);
+router
+  .route('/:id')
+  // Update a campground
+  .put(isLoggedIn, validateCampground, catchAsync(campgroundController.update))
+  // Route to a specific campground page
+  .get(catchAsync(campgroundController.showCampground))
+  // Remove a campground
+  .delete(isLoggedIn, authorizeChanges, catchAsync(campgroundController.delete));
 
-// Route to a specific campground page
-router.get(
-  '/:id',
-  catchAsync(async (req, res) => {
-    const campground = await Campground.findById(req.params.id).populate('reviews');
-    // Populates allows mongoose to display the content of each review object (only referenced by their id in the reviews array)
-    if (!campground) {
-      req.flash('error', 'Cannot find that campground!');
-      return res.redirect('/campgrounds');
-    }
-    res.render('campgrounds/show', { campground });
-  }),
-);
-
-// Remove a campground
-router.delete(
-  '/:id',
-  isLoggedIn,
-  catchAsync(async (req, res) => {
-    const { id } = req.params;
-    await Campground.findByIdAndDelete(id);
-    res.redirect('/campgrounds');
-  }),
-);
+// Route to the campground edit page
+router.get('/:id/edit', isLoggedIn, catchAsync(campgroundController.showEdit));
 
 module.exports = router;
