@@ -1,3 +1,7 @@
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
+
 const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
@@ -49,8 +53,8 @@ const sessionConfig = {
   saveUninitialized: true,
   cookie: {
     httpOnly: true,
-    expires: Date.now() + 3600 * 1000,
-    maxAge: 3600 * 1000,
+    expires: Date.now() + 24 * 3600 * 1000,
+    maxAge: 24 * 3600 * 1000,
   },
 };
 
@@ -68,9 +72,11 @@ passport.deserializeUser(User.deserializeUser());
 // Flash middleware for "flashing" elements referenced in the req.flash object ====>
 app.use(flash());
 app.use((req, res, next) => {
+  res.locals.currentUser = req.user;
   res.locals.success = req.flash('success');
   res.locals.error = req.flash('error');
-  res.locals.currentUser = req.user;
+
+  console.log(res.locals);
   next();
 });
 
@@ -81,19 +87,15 @@ app.use('/', UserRouter);
 app.use('/campgrounds', campgroundRouter);
 app.use('/campgrounds/:id/reviews', reviewsRouter); // requires "merge-params" option set to true in the Review router file
 
-
-
 // Basic app routes
 app.get('/', (_, res) => {
-    res.render('home.ejs');
-})
-
+  res.render('home.ejs');
+});
 
 // Fallback error when the route is not referenced
 app.all('*', (req, res, next) => {
   next(new ExpressError('Page not found', 404));
-})
-
+});
 
 // Middleware fallback for error handling
 app.use((err, req, res, next) => {
@@ -102,15 +104,9 @@ app.use((err, req, res, next) => {
     err.message = 'Oops something went wrong...';
   }
   res.status(status).render('error', { err });
-})
-
+});
 
 // Opens and listen to port 3000 on localhost
 app.listen(3000, () => {
-    console.log("Serving on port 3000");
-    }
-);
-
-
-
-
+  console.log('Serving on port 3000');
+});
