@@ -26,18 +26,18 @@
                 <textarea class="form-control" type="text" id="description"
                     name="campground[description]" required><%= campground.description%></textarea>
             </div>
-            <div class="mb-3">
-                <div class="form-file custom-file">
-                    <input type="file" class="form-file-input" id="images" name="image" multiple>
-                    <label class="form-file-label" for="images">
-                        <span class="form-file-text custom-file-label">Choose image(s)...</span>
-                        <span class="form-file-button">Browse</span>
-                    </label>
+                <div class="mb-3">
+                    <div class="form-file custom-file">
+                        <input type="file" class="form-file-input" id="image" name="image" multiple>
+                        <label class="form-file-label" for="image">
+                            <span class="form-file-text custom-file-label">Choose image(s)...</span>
+                            <span class="form-file-button">Browse</span>
+                        </label>
+                    </div>
                 </div>
-            </div>
             <div class="mb-3">
                 <% campground.images.forEach((image, i) => { %>
-                    <img src="image.url" class="img-thumbnail" alt="">
+                    <img src="<%= image.thumbnail %>" class="img-thumbnail" alt="">
                     <div class="form-check-inline">
                         <input type="checkbox" id="i" name="deleteImages[]" value="image.filename">
                     </div>

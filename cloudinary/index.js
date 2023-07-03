@@ -9,10 +9,11 @@ cloudinary.config({
 
 const storage = new CloudinaryStorage({
   cloudinary,
-  parmas: {
+  params: {
     folder: 'YelpCamp',
     allowedFormats: ['jpeg', 'png', 'jpg'],
   },
 });
+
 
 module.exports = { cloudinary, storage };

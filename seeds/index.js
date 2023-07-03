@@ -27,6 +27,10 @@ const seedDB = async () => {
           title: `${sample(descriptors)} ${sample(places)}`,
           images: [{ url: 'https://source.unsplash.com/collection/583204', filename: 'filename' }],
           description: 'Lorem ipsum',
+          geometry: {
+            type: 'Point',
+            coordinates: [cities[randomIdx].longitude, cities[randomIdx].latitude],
+          },
           price: Math.floor(Math.random() * 100) + 10,
           author: '649adac705cb2114a1706650',
         });
